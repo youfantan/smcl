@@ -6,9 +6,9 @@
 
 ### 如何使用
 
-输入命令`mvn package`以构建核心，将核心导入你的IDE即可使用。
+进入目录smclc，输入命令`mvn package`以构建核心，将核心（target\smclc-0.1-dev0807.jar）导入你的IDE即可使用。
 
-如果您想使用demo，请把demo目录用你的IDE打开后将lib目录加入Libraries，然后编译并运行主类xyz.shandiankulishe.smcl.core.demo.Main即可，使用时保持网络畅通。
+进入目录smcl-demo，输入命令`mvn package`以构建demo，运行jar文件（`java -jar target/smcl-demo-0.1dev0808-jar-with-dependencies.jar`）即可使用。
 
 如果您对这个项目有任何建议或意见，请发送Github Issues至本项目仓库，如果有改进意见请提交Github Pull Request至本项目仓库。
 
@@ -19,9 +19,9 @@
 
 ### How to Use?
 
-Enter the command `mvn package` to build this core,then import the core to your IDE.
+Enter the directory `smclc` and run the command `mvn package` to build the core,then import the core to your IDE.Enjoy Use!:D
 
-If you want to use demo,please first import the directory `demo` to your IDE,add the directory `lib` to Libraries,then compile and run main class `xyz.shandiankulishe.smcl.core.demo.main`.
+Enter the directory `smcl-demo` and run the command `mvn package` to build the demo,then run the command `java -jar target/smcl-demo-0.1dev0808-jar-with-dependencies.jar`.
 
 If you have any thinks of this project,please send Github Issues to this repository.If you have any suggestions for improvement please send Github Pull Request to this repository.
 

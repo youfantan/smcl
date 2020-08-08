@@ -13,7 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Tools {
-    Logger logger= LogManager.getLogger(downloadResources.class);
+    Logger logger= LogManager.getLogger(Tools.class);
     public String getFileSHA1(File targetFile) throws IOException, NoSuchAlgorithmException {
         FileInputStream fis=new FileInputStream(targetFile);
         MessageDigest messageDigest=MessageDigest.getInstance("SHA-1");

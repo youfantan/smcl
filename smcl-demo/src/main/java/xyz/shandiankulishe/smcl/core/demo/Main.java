@@ -16,10 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static org.fusesource.jansi.Ansi.*;
 import static org.fusesource.jansi.Ansi.Color;
@@ -133,6 +131,7 @@ public class Main {
             HashMap<String,List<String>> Libraries=Indexanalyze.getLibraries();
             logger.info("开始下载libraries（游戏运行依赖库）");
             startTime=System.currentTimeMillis();
+            StringBuilder libraries_paths=new StringBuilder();
             List<String> libraries_downloadUrl=Libraries.get("url");
             List<String> libraries_downloadPath=Libraries.get("path");
             List<String> libraries_downloadName=Libraries.get("name");
@@ -144,7 +143,13 @@ public class Main {
             String saveUrl=null;
             File librariesPath=new File(".minecraft\\libraries");
             librariesPath.mkdirs();
+            while (iterator.hasNext()){
+                nextValue=iterator.next();
+                toolkit.downloadResources(new URL(libraries_downloadUrl.get(downloadIndex)),new File(librariesPath+"\\"+libraries_downloadPath.get(downloadIndex)),libraries_downloadName.get(downloadIndex),libraries_downloadSha1.get(downloadIndex),libraries_downloadSize.get(downloadIndex));
+                libraries_paths.append(librariesPath+"\\"+libraries_downloadPath.get(downloadIndex)+" ");
 
+
+            }
             takeTime=endTime-startTime;
             takeTime=takeTime/1000;
             endTime=System.currentTimeMillis();
@@ -180,7 +185,7 @@ public class Main {
             downloadIndex=0;
             nextValue=null;
             String assets_download_url;
-            File assets_download_path;
+            File assets_download_path = null;
             String assets_hash_sec;
             while (iterator.hasNext()){
                 nextValue=iterator.next();
@@ -223,8 +228,79 @@ public class Main {
             takeTime=takeTime/1000;
             logger.info("游戏日志配置文件下载完成，耗时"+takeTime+"秒");
             String MainClass=Indexanalyze.getMainClass();
-            JSONObject Property=new JSONObject(FileUtils.readFileToString(new File("lau")))
-            CreateLaunchArgs createLaunchArgs=new CreateLaunchArgs(version,choosed_version_type,)
+            logger.info("开始生成启动参数");
+            JSONObject Property=new JSONObject(FileUtils.readFileToString(new File("launcher_property.json")));
+            String accessToken=Property.getString("clientToken");
+            String PlayerUUID=Property.getString("uuid");
+            String PlayerName=Property.getString("PlayerName");
+            CreateLaunchArgs createLaunchArgs=new CreateLaunchArgs(version,choosed_version_type,PlayerUUID,accessToken,logging_download_path,".minecraft\\bin",PlayerName,".minecraft",".minecraft\\assets",assetsIndex_download_id,MainClass,libraries_paths.toString());
+            createLaunchArgs.init();
+            String args=createLaunchArgs.createLaunchCommand();
+            String savePath=createLaunchArgs.saveArgs(args);
+            File gameProperty=new File("game_property.json");
+            if (!gameProperty.exists()){
+                gameProperty.createNewFile();
+                JSONObject property=new JSONObject(FileUtils.readFileToString(gameProperty,"UTF-8"));
+                JSONObject newVersion=new JSONObject();
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+                Date date=new Date(System.currentTimeMillis());
+                Main main=new Main();
+                String profileID=main.createID();
+                while (profileID == null){
+                    profileID= main.createID();
+                }
+                newVersion.put("version",version);
+                newVersion.put("createTime",formatter.format(date));
+                newVersion.put("type",choosed_version_type);
+                newVersion.put("LaunchArgPath",savePath);
+                property.put(version,newVersion);
+                FileUtils.write(gameProperty,property.toString(),"UTF-8");
+            } else {
+                JSONObject property=new JSONObject(FileUtils.readFileToString(gameProperty,"UTF-8"));
+                JSONObject newVersion=new JSONObject();
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+                Date date=new Date(System.currentTimeMillis());
+                Main main=new Main();
+                String profileID=main.createID();
+                while (profileID == null){
+                    profileID= main.createID();
+                }
+                newVersion.put("version",version);
+                newVersion.put("createTime",formatter.format(date));
+                newVersion.put("type",choosed_version_type);
+                newVersion.put("LaunchArgPath",savePath);
+                property.put(profileID,newVersion);
+                FileUtils.write(gameProperty,property.toString(),"UTF-8");
+            }
+            logger.info("成功生成参数，启动器即将退出，请您手动启动");
+            for (int i=3;i>0;i++){
+                logger.info("启动器将在"+i+"秒后退出");
+                Thread.sleep(1000);
+            }
+            System.exit(0);
         }
+    }
+    public String createID() throws IOException {
+        File gameProperty=new File("game_property.json");
+        JSONObject property=new JSONObject(FileUtils.readFileToString(gameProperty,"UTF-8"));
+        System.out.println("给您的游戏档案起个名字吧");
+        Scanner createID=new Scanner(System.in);
+        String profileID=createID.next();
+        String Next;
+        Iterator<String> iterator1=property.keys();
+        while (iterator1.hasNext()){
+            Next=new String(iterator1.next());
+            if (Next.equals(profileID)){
+                System.out.println("您的档案名重复了，请修改");
+            } else {
+                return profileID;
+            }
+            if (Next.equals("CREATE_NEW_PROFILE")){
+                System.out.println("您的档案名不合法，请修改");
+            } else {
+                return profileID;
+            }
+        }
+        return null;
     }
 }
