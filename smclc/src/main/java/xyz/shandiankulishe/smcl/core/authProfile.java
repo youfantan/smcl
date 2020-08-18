@@ -1,5 +1,7 @@
 package xyz.shandiankulishe.smcl.core;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,8 +29,8 @@ public class authProfile {
         String load=Object;
         return load;
     }
-    private String POST(String load) throws IOException {
-        String content;
+    private String POST(String load) throws IOException, AccountNotFoundException {
+        String content=null;
         connection= (HttpURLConnection) authServer.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoInput(true);
@@ -40,22 +42,48 @@ public class authProfile {
         osw.write(load);
         osw.flush();
         osw.close();
-        isr=new InputStreamReader(connection.getInputStream(),"UTF-8");
-        br=new BufferedReader(isr);
-        String line;
-        while ((line=br.readLine())!=null){
-            builder.append(line);
-        }
-        content=builder.toString();
         ResponseCode=connection.getResponseCode();
-        return content;
+        if (connection.getResponseCode()==403){
+            throw new AccountNotFoundException();
+        } else {
+            isr=new InputStreamReader(connection.getInputStream(),"UTF-8");
+            br=new BufferedReader(isr);
+            String line;
+            while ((line=br.readLine())!=null){
+                builder.append(line);
+            }
+            content=builder.toString();
+            return builder.toString();
+        }
     }
     public int getResponseCode(){
         return ResponseCode;
     }
-    public String get() throws IOException {
+    public String get() throws IOException, AccountNotFoundException {
         String load=createLoad();
         String returnValue=POST(load);
         return returnValue;
+    }
+    public String getAccessToken(String OriginReturnValue){
+        JSONObject object=new JSONObject(OriginReturnValue);
+        String accessToken=object.getString("accessToken");
+        return accessToken;
+    }
+    public String getClientToken(String OriginReturnValue){
+        JSONObject object=new JSONObject(OriginReturnValue);
+        String clientToken=object.getString("clientToken");
+        return clientToken;
+    }
+    public String getPlayerUUID(String OriginReturnValue){
+        JSONObject object=new JSONObject(OriginReturnValue);
+        JSONObject selectedProfile=object.getJSONObject("availableProfiles");
+        String id=selectedProfile.getString("id");
+        return id;
+    }
+    public String getPlayerName(String OriginReturnValue){
+        JSONObject object=new JSONObject(OriginReturnValue);
+        JSONObject selectedProfile=object.getJSONObject("availableProfiles");
+        String name=selectedProfile.getString("name");
+        return name;
     }
 }
