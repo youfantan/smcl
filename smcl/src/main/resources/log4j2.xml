@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} [%level] %t %m%n"/>
+        </Console>
+        <RollingFile name="RollingFile" fileName="launcher_log/info.log"
+                     filePattern="launcher_log/%d{yyyy-M-dd HH.mm.ss}.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy MMM dd HH:mm:ss} [%level] %t %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy minSize="1"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
